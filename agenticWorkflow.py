@@ -3,7 +3,7 @@ from crewai import Agent, Task, Crew
 from arxivController import SearchArxiv
 import arxiv
 
-os.environ['OPENAI_API_KEY'] = os.environ["OPEN_AI"]
+os.environ['OPENAI_API_KEY'] = os.environ.get('OPENAI')
 client = arxiv.Client()
 search_arxiv_instance = SearchArxiv
 
@@ -13,8 +13,8 @@ researcher = Agent(
     verbose=True,
     memory=True,
     backstory=(
-        'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence and Software Engineering. '
-        'Having worked as a senior researcher at a top-tier university, the Researcher has published numerous papers in prestigious journals '
+        'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence and Software Engineering.'
+        'Having worked as a senior researcher at a top-tier university, the Researcher has published numerous papers in prestigious journals'
         'and conferences. With a passion for advancing knowledge and helping others learn, the Researcher has developed sophisticated '
         'natural language processing techniques to analyze and synthesize research papers from arXiv. The agent is dedicated to curating '
         'cutting-edge topics that align with your learning goals, providing you with the most relevant and up-to-date information in '
@@ -23,23 +23,32 @@ researcher = Agent(
     tools=[search_arxiv_instance.search_articles]
 )
 
+search_and_select = Agent(
+    role='Select Articles',
+    goal='Use a tool to search for articles in arxiv based on the provided topics and select a research paper',
+    verbose=True,
+    memory=True,
+    backstory=(
+        'The Select Articles is an agent with a PhD in Computer Science focused on teaching engineers based on research papers.' 
+        'The agent reads all summaries, finds an article, looks through other summaries and either uses the summaries or the content from other articles to help engineers learn more about the chosen research paper'         
+    ),
+    tools=[search_arxiv_instance.download_papers]
+)
+
 fetch = Task(
-    description="Select 1 topic in each of the fields, passing in the topics selected as a query into the search_tool",
+    description="Select 1 topic in any of the fields, passing in the topics selected as a query into the search_tool",
     expected_output="A JSON containining; the field, and the topic selected for each field",
     agent=researcher,
 )
 
+get_articles = Task(
+    description="Randomly select an article. If, based on the summary of the articles you find other related articles (ie. research papers directly related to the paper you chose), select these too. Do not select more than 3 papers",
+    expected_output="Links to PDFs for each article selected",
+    agent=search_and_select
+)
 
-my_crew = Crew(agents=[researcher], tasks=[fetch])
+
+my_crew = Crew(agents=[researcher, search_and_select], tasks=[fetch, get_articles])
 crew = my_crew.kickoff()
 
 
-# search_and_select = Agent(
-#     role='Select Articles',
-#     goal='Use a tool to search for articles in arxiv based on the provided topics and select 1-3 similar research papers',
-#     verbose=True,
-#     memory=True,
-#     backstory=(
-#         'The Select Articles, selects 1 or multiple research papers dealing with the topics selected by the Researcher. The Select Articles agent, ensures to select articles that can be read together to form a deeper understanding of the topic discussed. The Select articles agent will select only one article if the article needs to be read in isolation.'
-#     )
-# )
