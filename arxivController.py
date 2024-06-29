@@ -19,7 +19,7 @@ class SearchArxiv:
 
         Returns:
             list: A list of dictionaries containing article details (entry_id, title, pdf_url, summary).
-        """
+        """ 
         search = arxiv.Search(
             query=query,
             max_results=max_results,
