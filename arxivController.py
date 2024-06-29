@@ -10,7 +10,7 @@ class SearchArxiv:
         self.client = arxiv.Client()
 
     @tool("Search Arxiv articles")
-    def search_articles(query, max_results=100):
+    def search_articles(query, max_results=5):
         """
         Searches for articles on arXiv based on a query.
         
@@ -58,9 +58,12 @@ class SearchArxiv:
 
         Args:
             article_id (str): The ID of the article to fetch.
+            download (bool): Whether to download the PDF.
+            filename (str): The name of the file to save the PDF as.
+            dirpath (str): The directory path to save the PDF.
 
         Returns:
-            dict: A dictionary containing article details (entry_id, title, pdf_url, summary).
+            str: The path to the TXT file.
         """
         search = arxiv.Search(id_list=[article_id])
         results = list(client.results(search))
@@ -69,25 +72,18 @@ class SearchArxiv:
             return None
         
         article = results[0]
-        pdf_path = None
+        dirpath = dirpath or os.getcwd()
+        pdf_path = article.download_pdf(dirpath=dirpath, filename=filename)
 
-        if download:
-            if dirpath is None:
-                dirpath = os.getcwd()
-            if filename is None:
-                pdf_path = article.download_pdf(dirpath=dirpath)
-            else:
-                pdf_path = article.download_pdf(dirpath=dirpath, filename=filename)
-
-            # Convert PDF to TXT
-            if pdf_path:
-                txt_path = os.path.splitext(pdf_path)[0] + '.txt'
-                with open(pdf_path, 'rb') as pdf_file:
-                    pdf_reader = PyPDF2.PdfReader(pdf_file)
-                    text = ''.join(page.extract_text() for page in pdf_reader.pages)
-                with open(txt_path, 'w', encoding='utf-8') as txt_file:
-                    txt_file.write(text)
-
-        return pdf_path
+        # Convert PDF to TXT
+        txt_path = None
+        if pdf_path:
+            txt_path = os.path.splitext(pdf_path)[0] + '.txt'
+            with open(pdf_path, 'rb') as pdf_file:
+                pdf_reader = PyPDF2.PdfReader(pdf_file)
+                text = ''.join(page.extract_text() for page in pdf_reader.pages)
             
+            with open(txt_path, 'w', encoding='utf-8') as txt_file:
+                txt_file.write(text)
 
+        return txt_path

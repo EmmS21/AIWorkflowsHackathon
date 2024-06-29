@@ -35,6 +35,18 @@ search_and_select = Agent(
     tools=[search_arxiv_instance.download_papers]
 )
 
+summarizer = Agent(
+    role='Summarizer',
+    goal='Summarize the text of the research paper',
+    verbose=True,
+    memory=True,
+    backstory=(
+        'The Summarizer is an AI agent specialized in natural language processing and summarization. '
+        'It uses advanced techniques to generate concise and informative summaries of research papers.'
+    ),
+    tools=[]
+)
+
 fetch = Task(
     description="Select 1 topic in any of the fields, passing in the topics selected as a query into the search_tool",
     expected_output="A JSON containining; the field, and the topic selected for each field",
@@ -47,8 +59,9 @@ get_articles = Task(
     agent=search_and_select
 )
 
-
-my_crew = Crew(agents=[researcher, search_and_select], tasks=[fetch, get_articles])
+my_crew = Crew(agents=[researcher, search_and_select, summarizer], tasks=[fetch, get_articles])
 crew = my_crew.kickoff()
 
-
+# Print the summaries
+for article in crew['get_articles']['output']:
+    print(f"Summary for article {article['pdf_links']}:\n{article['summary']}\n")
