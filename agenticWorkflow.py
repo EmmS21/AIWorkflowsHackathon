@@ -16,7 +16,7 @@ researcher = Agent(
         'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence.'
         'You role is to help Software Engineers learn more about Artificial Intelligence, picking topics most aligned with trends emerging in the space and useful for engineers venturing into AI'
     ),
-    tools=[search_arxiv_instance.search_articles, search_arxiv_instance.download_papers]
+    tools=[search_arxiv_instance.search_articles, search_arxiv_instance.download_papers, search_arxiv_instance.extract_text]
 )
 
 blogger = Agent(
@@ -37,9 +37,21 @@ fetch = Task(
     agent=researcher,
 )
 
-get_articles = Task(
+get_article = Task(
     description="Randomly select an article. ",
     expected_output="Links to PDF for each article selected and a summary of this article",
+    agent=researcher
+)
+
+download_article = Task(
+    description="Use the download_papers tool to download the pdf based on the article_id",
+    expected_output="Link to locally downloaded pdf",
+    agent=researcher
+)
+
+extract_text = Task(
+    description="Use the link to the downloaded pdf and pass that into the extract_text task to extract the text from the pdf",
+    expected_output="Full text based on the pdf downloaded",
     agent=researcher
 )
 
@@ -80,5 +92,5 @@ practical = Task(
 )
 
 
-my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, get_articles, read_full_article, revision, add_flashcards, math_explainer, additional_research, practical ])
+my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, get_article, download_article, extract_text, read_full_article, revision, add_flashcards, math_explainer, additional_research, practical ])
 crew = my_crew.kickoff()

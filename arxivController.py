@@ -2,6 +2,7 @@ import arxiv
 from crewai_tools import tool
 import os
 import PyPDF2
+import time
 
 client = arxiv.Client()
 
@@ -38,53 +39,45 @@ class SearchArxiv:
         ]
         return res
     
-    # I think we might want to fetch the text from the PDF(s) provided
-    # Extract text in chunks
-    # use something like LlamaIndex to create an index and query the chunks
-    # build a summary with each chunk 
-    # continue to edit summary based on information extracted from each chunk
-    # summary = 
-    # i. explain in simple words, building in complexity (start off using every day examples, getting more technical and detailed with each paragraph)
-    # ii. explain what the value of the paper is (why is this important - giving practical examples)
-    # iii. Are there any formulas include, explain these to me simply (what do they mean in relation to the topic)
-    # iv. What is the prior research that led to this development (what does this improve)
-    # v. incluce a list of questions (progressively more technical) that I could answer to revise everything I learnt
-    # vi. Is there anything I can build (simple project) to cement my understanding about things covered in this 
-
     @tool("Download research papers")
-    def download_papers(article_id, download=True, filename=None, dirpath="data"):
+    def download_papers(article_id, retries=3):
         """
-        Fetches specific article details from arXiv based on the article_id.
+        Searches and downloads article details from arXiv based on the article_id.
 
         Args:
             article_id (str): The ID of the article to fetch.
 
         Returns:
-            dict: A dictionary containing article details (entry_id, title, pdf_url, summary).
+            pdf_path: A link to the extracted pdf
         """
-        search = arxiv.Search(id_list=[article_id])
-        results = list(client.results(search))
+        result = next(client.results(arxiv.Search(id_list=[article_id])))
 
-        if not results:
+        if not result:
             return None
         
-        article = results[0]
-        pdf_path = None
+        filename = f"{article_id}.pdf"            
+        while retries != 0:
+            try:
+                result.download_pdf(filename=filename)
+            except:
+                retries -= 1
+        return filename
 
-        if download:
-            if dirpath is None:
-                dirpath = os.getcwd()
-            if filename is None:
-                pdf_path = article.download_pdf(dirpath=dirpath)
-            else:
-                pdf_path = article.download_pdf(dirpath=dirpath, filename=filename)
+    @tool("Extract text from pdf")
+    def extract_text(pdf_path):
+        """
+        Extracts the text from a downloaded pdf based on the path to the pdf.
 
-            # Convert PDF to TXT
-            if pdf_path:
-                with open(pdf_path, 'rb') as pdf_file:
-                    pdf_reader = PyPDF2.PdfReader(pdf_file)
-                    text = ''.join(page.extract_text() for page in pdf_reader.pages)
+        Args:
+            pdf_path (str): A path to the downloaded PDF.
 
+        Returns:
+            text: Full article text
+        """
+        text = None
+        with open(pdf_path, 'rb') as pdf_file:
+            pdf_reader = PyPDF2.PdfReader(pdf_file)
+            text = ''.join(page.extract_text() for page in pdf_reader.pages)
         return text
-            
+
 
