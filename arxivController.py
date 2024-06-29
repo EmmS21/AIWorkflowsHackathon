@@ -50,34 +50,34 @@ class SearchArxiv:
     # v. incluce a list of questions (progressively more technical) that I could answer to revise everything I learnt
     # vi. Is there anything I can build (simple project) to cement my understanding about things covered in this 
 
-    # @tool("Download research papers")
-    # def download_papers(article_id, download=True, filename=None, dirpath=None):
-    #     """
-    #     Fetches specific article details from arXiv based on the article_id.
+    @tool("Download research papers")
+    def download_papers(article_id, download=True, filename=None, dirpath="data"):
+        """
+        Fetches specific article details from arXiv based on the article_id.
 
-    #     Args:
-    #         article_id (str): The ID of the article to fetch.
+        Args:
+            article_id (str): The ID of the article to fetch.
 
-    #     Returns:
-    #         dict: A dictionary containing article details (entry_id, title, pdf_url, summary).
-    #     """
-    #     search = arxiv.Search(id_list=[article_id])
-    #     results = list(client.results(search))
+        Returns:
+            dict: A dictionary containing article details (entry_id, title, pdf_url, summary).
+        """
+        search = arxiv.Search(id_list=[article_id])
+        results = list(client.results(search))
 
-    #     if not results:
-    #         return None
+        if not results:
+            return None
         
-    #     article = results[0]
-    #     pdf_path = None
+        article = results[0]
+        pdf_path = None
 
-    #     if download:
-    #         if dirpath is None:
-    #             dirpath = os.getcwd()
-    #         if filename is None:
-    #             pdf_path = article.download_pdf(dirpath=dirpath)
-    #         else:
-    #             pdf_path = article.download_pdf(dirpath=dirpath, filename=filename)
+        if download:
+            if dirpath is None:
+                dirpath = os.getcwd()
+            if filename is None:
+                pdf_path = article.download_pdf(dirpath=dirpath)
+            else:
+                pdf_path = article.download_pdf(dirpath=dirpath, filename=filename)
 
-    #     return pdf_path
+        return pdf_path
             
 
