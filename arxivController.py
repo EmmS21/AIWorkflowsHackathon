@@ -1,6 +1,7 @@
 import arxiv
 from crewai_tools import tool
 import os
+import PyPDF2
 
 client = arxiv.Client()
 
@@ -77,6 +78,15 @@ class SearchArxiv:
                 pdf_path = article.download_pdf(dirpath=dirpath)
             else:
                 pdf_path = article.download_pdf(dirpath=dirpath, filename=filename)
+
+            # Convert PDF to TXT
+            if pdf_path:
+                txt_path = os.path.splitext(pdf_path)[0] + '.txt'
+                with open(pdf_path, 'rb') as pdf_file:
+                    pdf_reader = PyPDF2.PdfReader(pdf_file)
+                    text = ''.join(page.extract_text() for page in pdf_reader.pages)
+                with open(txt_path, 'w', encoding='utf-8') as txt_file:
+                    txt_file.write(text)
 
         return pdf_path
             
