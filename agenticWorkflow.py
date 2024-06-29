@@ -10,7 +10,7 @@ search_arxiv_instance = SearchArxiv
 researcher = Agent(
     role='Researcher',
     goal='Generate a random topic in artificial intelligence to help me learn',
-    verbose=False,
+    verbose=True,
     memory=True,
     backstory=(
         'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence.'
@@ -22,7 +22,7 @@ researcher = Agent(
 blogger = Agent(
     role='Blog Poster',
     goal='Produce a detailed blog post explaining back a research paper with increasing levels of technical difficulty',
-    verbose=False,
+    verbose=True,
     memory=True,
     backstory=(
         'The Blogger is an agent that is designed to help Software Engineers learn from research papers with increasing levels of complexity'
@@ -80,5 +80,33 @@ compile_full = Task(
 )
 
 
-my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, read_full_article, revision, add_flashcards, additional_research, practical, compile_full ])
+# my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, read_full_article, revision, add_flashcards, additional_research, practical, compile_full ], output_log_file="output.md")
+my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, read_full_article, revision, add_flashcards, additional_research, practical, compile_full], output_log_file="output.txt")
 crew = my_crew.kickoff()
+
+# Read the content of the output.txt file
+with open('output.txt', 'r') as file:
+    lines = file.readlines()
+
+# Initialize variables
+filtered_lines = []
+skip_lines = False
+
+# Words to filter out
+filtered_words = ["  File ", "raise_for_status", "For more information check", "INFO", "DEBUG", "Traceback", "During handling of the", "agent=", "status="]
+
+# Iterate through each line
+for line in lines:
+    # Check if the line contains any of the filtered words
+    if any(word in line for word in filtered_words):
+        skip_lines = True
+    elif skip_lines and line.strip() == "":
+        skip_lines = False
+    elif not skip_lines:
+        filtered_lines.append(line)
+
+# Write the filtered content back to the file
+with open('output_cleaned.md', 'w') as file:
+    # delete everything there before
+    file.truncate(0)
+    file.writelines(filtered_lines)

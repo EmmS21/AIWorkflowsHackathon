@@ -11,7 +11,7 @@ class SearchArxiv:
         self.client = arxiv.Client()
 
     @tool("Search Arxiv articles")
-    def search_articles(query, max_results=2):
+    def search_articles(query, max_results=50):
         """
         Searches for articles on arXiv based on a query.
         
