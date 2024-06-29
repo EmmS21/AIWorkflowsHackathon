@@ -32,6 +32,17 @@ summarize = Agent(
     )
 )
 
+teacher = Agent(
+    role='Teacher',
+    goal='Generate a study guide based on the summary of the summarizer',
+    verbose=True,
+    memory=True,
+    backstory=(
+        'The Teacher is an AI agent that specializes in the topic of the summary'
+        'Your role is to understand the summary of the article and create a study guide that will allow me to understand and learn what the summary of the article is about'
+    )
+)
+
 fetch = Task(
     description="Select 1 topic, passing in the topic selected as a query into the search_tool",
     expected_output="A JSON containining; the field, and the topic selected for each field",
