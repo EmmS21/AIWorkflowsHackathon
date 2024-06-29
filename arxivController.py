@@ -40,7 +40,7 @@ class SearchArxiv:
         return res
     
     @tool("Download research papers")
-    def download_papers(article_id, retries=3):
+    def download_papers(article_id):
         """
         Searches and downloads article details from arXiv based on the article_id.
 
@@ -52,32 +52,24 @@ class SearchArxiv:
         """
         result = next(client.results(arxiv.Search(id_list=[article_id])))
 
-        if not result:
-            return None
-        
         filename = f"{article_id}.pdf"            
-        while retries != 0:
-            try:
-                result.download_pdf(filename=filename)
-            except:
-                retries -= 1
-        return filename
+        return result.download_pdf(filename=filename)
 
-    @tool("Extract text from pdf")
-    def extract_text(pdf_path):
-        """
-        Extracts the text from a downloaded pdf based on the path to the pdf.
+    # @tool("Extract text from pdf")
+    # def extract_text(pdf_path):
+    #     """
+    #     Extracts the text from a downloaded pdf based on the path to the pdf.
 
-        Args:
-            pdf_path (str): A path to the downloaded PDF.
+    #     Args:
+    #         pdf_path (str): A path to the downloaded PDF.
 
-        Returns:
-            text: Full article text
-        """
-        text = None
-        with open(pdf_path, 'rb') as pdf_file:
-            pdf_reader = PyPDF2.PdfReader(pdf_file)
-            text = ''.join(page.extract_text() for page in pdf_reader.pages)
-        return text
+    #     Returns:
+    #         text: Full article text
+    #     """
+    #     text = None
+    #     with open(pdf_path, 'rb') as pdf_file:
+    #         pdf_reader = PyPDF2.PdfReader(pdf_file)
+    #         text = ''.join(page.extract_text() for page in pdf_reader.pages)
+    #     return text
 
 

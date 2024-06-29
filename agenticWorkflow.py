@@ -10,19 +10,19 @@ search_arxiv_instance = SearchArxiv
 researcher = Agent(
     role='Researcher',
     goal='Generate a random topic in artificial intelligence to help me learn',
-    verbose=True,
+    verbose=False,
     memory=True,
     backstory=(
         'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence.'
         'You role is to help Software Engineers learn more about Artificial Intelligence, picking topics most aligned with trends emerging in the space and useful for engineers venturing into AI'
     ),
-    tools=[search_arxiv_instance.search_articles, search_arxiv_instance.download_papers, search_arxiv_instance.extract_text]
+    tools=[search_arxiv_instance.search_articles, search_arxiv_instance.download_papers]
 )
 
 blogger = Agent(
     role='Blog Poster',
     goal='Produce a detailed blog post explaining back a research paper with increasing levels of technical difficulty',
-    verbose=True,
+    verbose=False,
     memory=True,
     backstory=(
         'The Blogger is an agent that is designed to help Software Engineers learn from research papers with increasing levels of complexity'
@@ -39,19 +39,7 @@ fetch = Task(
 
 get_article = Task(
     description="Randomly select an article. ",
-    expected_output="Links to PDF for each article selected and a summary of this article",
-    agent=researcher
-)
-
-download_article = Task(
-    description="Use the download_papers tool to download the pdf based on the article_id",
-    expected_output="Link to locally downloaded pdf",
-    agent=researcher
-)
-
-extract_text = Task(
-    description="Use the link to the downloaded pdf and pass that into the extract_text task to extract the text from the pdf",
-    expected_output="Full text based on the pdf downloaded",
+    expected_output="Links to PDF for the article selected",
     agent=researcher
 )
 
@@ -61,21 +49,15 @@ read_full_article = Task(
     agent=blogger
 )
 
-revision = Task(
+revision = Task( 
     description="Expand on the blog post by adding practical example for each concept explained. The examples should be incrementally more technical and detailed", 
-    expected_output="Blog post with Practical Examples header for each practical example included.",
+    expected_output="Blog post with Practical Examples header for each practical example included.", 
     agent=blogger
 )
 
 add_flashcards = Task(
     description="Expand on the blog post by including flash cards and MCQ questions. For each concept explained, include flash cards and MCQs at the end of paragraphs with their own header. The questions should be aimed at testing my understanding of everything discussed in each paragraph. Include the answers to all the questions at the end of the article.",
     expected_output="Blog post with a header for the flashcards and MCQs included to clearly denote where they start",
-    agent=blogger
-)
-
-math_explainer = Task(
-    description="Expand on the blog post by explaining all mathematical formulas used to in non-technical terms. Explain what the formulas mean in the context of the research, include additional links for further reading for each formula",
-    expected_output="Add a paragraph to the blog post with the header 'Mathematical Formulas'. In this, show each formula used and explain in simple terms, what the formula means, why it is important, how it is relevant to the research and what impact it has",
     agent=blogger
 )
 
@@ -91,6 +73,12 @@ practical = Task(
     agent=blogger
 )
 
+compile_full = Task(
+    description="Based on all the output from the previous texts, compile a full blog post with clear headers for each section",
+    expected_output="Full text with headers as a markdown",
+    agent=blogger
+)
 
-my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, get_article, download_article, extract_text, read_full_article, revision, add_flashcards, math_explainer, additional_research, practical ])
+
+my_crew = Crew(agents=[researcher, blogger], tasks=[fetch, read_full_article, revision, add_flashcards, additional_research, practical, compile_full ])
 crew = my_crew.kickoff()
