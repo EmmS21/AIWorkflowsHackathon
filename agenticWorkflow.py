@@ -75,7 +75,8 @@ additional_research = Task(
 
 practical = Task(
     description="Expand on the blog post by giving 3-5 examples of simple practical Software Engineering projects I can build to put into practice what the research paper talks about. Include a detailed summary of each project idea, what the MVP would look like and how it would help me learn",
-    expected_output="Add a paragraph to the blog post with the header Practical Examples, this should include all the practical examples"
+    expected_output="Add a paragraph to the blog post with the header Practical Examples, this should include all the practical examples",
+    agent=blogger
 )
 
 
