@@ -9,16 +9,12 @@ search_arxiv_instance = SearchArxiv
 
 researcher = Agent(
     role='Researcher',
-    goal='Generate topics in artificial intelligence and software engineering to help me learn',
+    goal='Generate a random topic in artificial intelligence to help me learn',
     verbose=True,
     memory=True,
     backstory=(
-        'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence and Software Engineering.'
-        'Having worked as a senior researcher at a top-tier university, the Researcher has published numerous papers in prestigious journals'
-        'and conferences. With a passion for advancing knowledge and helping others learn, the Researcher has developed sophisticated '
-        'natural language processing techniques to analyze and synthesize research papers from arXiv. The agent is dedicated to curating '
-        'cutting-edge topics that align with your learning goals, providing you with the most relevant and up-to-date information in '
-        'Software Engineering and AI.'
+        'The Researcher is an agent with a PhD in Computer Science, specializing in Artificial Intelligence.'
+        'You role is to help Software Engineers learn more about Artificial Intelligence, picking topics most aligned with trends emerging in the space and useful for engineers venturing into AI'
     ),
     tools=[search_arxiv_instance.search_articles]
 )
@@ -36,19 +32,19 @@ search_and_select = Agent(
 )
 
 fetch = Task(
-    description="Select 1 topic in any of the fields, passing in the topics selected as a query into the search_tool",
+    description="Select 1 topic, passing in the topic selected as a query into the search_tool",
     expected_output="A JSON containining; the field, and the topic selected for each field",
     agent=researcher,
 )
 
 get_articles = Task(
-    description="Randomly select an article. If, based on the summary of the articles you find other related articles (ie. research papers directly related to the paper you chose), select these too. Do not select more than 3 papers",
-    expected_output="Links to PDFs for each article selected",
-    agent=search_and_select
+    description="Randomly select an article. ",
+    expected_output="Links to PDF for each article selected and a summary of this article",
+    agent=researcher
 )
 
 
-my_crew = Crew(agents=[researcher, search_and_select], tasks=[fetch, get_articles])
+my_crew = Crew(agents=[researcher], tasks=[fetch, get_articles])
 crew = my_crew.kickoff()
 
 
