@@ -1,7 +1,10 @@
+from flask import Flask, jsonify
 import os
 from crewai import Agent, Task, Crew
 from arxivController import SearchArxiv
 import arxiv
+
+app = Flask(__name__)
 
 os.environ['OPENAI_API_KEY'] = os.environ.get('OPENAI')
 client = arxiv.Client()
@@ -62,4 +65,12 @@ introductory = Task(
 )
 
 my_crew = Crew(agents=[researcher, summarize], tasks=[fetch, get_articles, introductory])
-crew = my_crew.kickoff()
+# crew = my_crew.kickoff()
+
+@app.route('/api/', methods=['GET'])
+def kickoff():
+    result = my_crew.kickoff()
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run(debug=True)
