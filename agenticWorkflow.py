@@ -19,6 +19,19 @@ researcher = Agent(
     tools=[search_arxiv_instance.search_articles]
 )
 
+summarize = Agent(
+    role='Summarizer',
+    goal='Produce a summarize explaining back a research paper with increasing levels of technical difficulty',
+    verbose=True,
+    memory=True,
+    backstory=(
+        'The Summarizer is an agent that is designed to help Software Engineers learn from researcg papers with increasing levels of complexity'
+        'You will start off by explaining the article as though I am five, giving practical examples suited for your explanation'
+        'With each proceeeding paragraph you will expand on your explanation, including examples in each step relevant to the level of expertise you are explaining'
+        'You will include flash cards and MCQ type questions to test my understanding (include the answers to the questions at the end of the article)'
+    )
+)
+
 fetch = Task(
     description="Select 1 topic, passing in the topic selected as a query into the search_tool",
     expected_output="A JSON containining; the field, and the topic selected for each field",
@@ -31,10 +44,11 @@ get_articles = Task(
     agent=researcher
 )
 
+introductory = Task(
+    description="Explain the article back to me like I am 5 years old. Include, what the article is about, why this is important, the practical usage of this, how it can be used and what improvement this makes to existing methods",
+    expected_output="Text summary",
+    agent=summarize
+)
 
-my_crew = Crew(agents=[researcher], tasks=[fetch, get_articles])
+my_crew = Crew(agents=[researcher, summarize], tasks=[fetch, get_articles, introductory])
 crew = my_crew.kickoff()
-
-# Print the summaries
-for article in crew['get_articles']['output']:
-    print(f"Summary for article {article['pdf_links']}:\n{article['summary']}\n")
