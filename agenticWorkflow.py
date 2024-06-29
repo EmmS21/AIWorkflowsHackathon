@@ -41,7 +41,7 @@ teacher = Agent(
     verbose=True,
     memory=True,
     backstory=(
-        'The Teacher is an AI agent that specializes in the topic of the summary'
+        'The Teacher is an AI agent that specializes in the topic of the article'
         'Your role is to understand the summary of the article and create a study guide that will allow me to understand and learn what the summary of the article is about'
     )
 )
